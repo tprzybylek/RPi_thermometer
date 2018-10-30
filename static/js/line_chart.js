@@ -1,56 +1,4 @@
-{% load static %}
-
-<!DOCTYPE html>
-<html lang="en">
-
-<style type="text/css">
-/* 13. Basic Styling with CSS */
-
-/* Style the lines by removing the fill and applying a stroke */
-.line {
-    fill: none;
-    stroke: #ffab00;
-    stroke-width: 3;
-}
-
-.overlay {
-  fill: none;
-  pointer-events: all;
-}
-
-/* Style the dots by assigning a fill and stroke */
-.dot {
-    fill: #ffab00;
-    stroke: #fff;
-}
-
-  .focus circle {
-  fill: none;
-  stroke: steelblue;
-}
-
-</style>
-
-<head>
-    <meta charset="UTF-8">
-    <title>Dashboard</title>
-</head>
-<body>
-    <h1>Temperatura:</h1>
-    <p>{{ temperature }}°C</p>
-
-    <h1>Wilgotność:</h1>
-    <p>{{ humidity }}%</p>
-
-    <p>{{ records.temperature }}</p>
-    <p>{{ records.humidity }}</p>
-
-    <svg></svg>
-
-    <script src="{% static "/js/d3.v5.min.js" %}"></script>
-    <script>
-
-        function parseData(data) {
+function parseData(data) {
     var datetimeFormat = d3.isoFormat;
 
     var arr = [];
@@ -65,7 +13,7 @@
     return arr;
 }
 
-var data = parseData({{ records.temperature|safe }})
+var data = parseData([["2018-10-29T20:32:06.418", "15.56"], ["2018-10-29T20:40:16.913", "17.20"], ["2018-10-29T21:06:10.458", "19.32"], ["2018-10-30T19:01:40.271", "20.19"], ["2018-10-30T19:02:12.081", "16.60"]])
 
 var svgWidth = 640, svgHeight = 480;
 var margin = { top: 20, right: 20, bottom: 50, left: 50 };
@@ -115,7 +63,3 @@ g.append("path")
     .attr("stroke-linecap", "round")
     .attr("stroke-width", 1.5)
     .attr("d", line);
-
-    </script>
-</body>
-</html>
