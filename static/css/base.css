@@ -1,0 +1,93 @@
+body {
+    font-family: "Roboto", "Lucida Grande", Verdana, Arial, sans-serif;
+    font-size: 16px;
+}
+
+#chart {
+    width: 100%;
+    height: 480px;
+}
+
+.container > div {
+    background-color: #e6e6e6;
+    padding: 1em;
+    margin: 0.5em;
+    color: #000000;
+}.container {
+    display: grid;
+    grid-template-columns: 50% 50%;
+    grid-template-rows: 5em 8em 8em 5em auto;
+    margin: auto;
+    max-width: 800px;
+}
+
+ .container > div:hover {
+    background-color: #d7d7d7;
+}
+
+ .description {
+
+ }
+
+ .hour {
+     text-align: right;
+ }.sun{
+    font-size: 2em;
+   }
+
+ .value {
+     font-size: 4em;
+     text-align: right;
+     font-family: 'Roboto Mono', monospace;
+ }
+
+.datetime {
+    grid-column: 1 / 3;
+    grid-row: 1;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+}
+
+.temperature {
+    grid-column: 1 / 3;
+    grid-row: 2;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+}
+
+.humidity {
+    grid-column: 1 / 3;
+    grid-row: 3;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+}
+
+.sunrise {
+    grid-column: 1;
+    grid-row: 4;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+}
+
+.sunset {
+    grid-column: 2;
+    grid-row: 4;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+}
+
+.chart {
+    grid-column: 1 / 3;
+    grid-row: 5;
+}
+
+@media only screen and (max-width: 600px) {
+    body {
+        margin: 0px;
+    }
+
+    .container {
+        margin: 0.5em;
+        min-width: 390px;
+    }
+}

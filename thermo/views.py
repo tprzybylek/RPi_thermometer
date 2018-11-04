@@ -8,16 +8,15 @@ import json
 from django.core.serializers.json import DjangoJSONEncoder
 
 
-
 def get_current_reading():
     sensor_model = adafruit.AM2302
     sensor_pin = 4
 
-    humidity, temperature = adafruit.read_retry(sensor_model, sensor_pin)
-    humidity = round(humidity, 2)
-    temperature = round(temperature, 2)
+    # humidity, temperature = adafruit.read_retry(sensor_model, sensor_pin)
+    # humidity = round(humidity, 0)
+    # temperature = round(temperature, 1)
 
-    # humidity, temperature = round(random.uniform(45.0, 80.0), 2), round(random.uniform(15.0, 23.0), 2)
+    humidity, temperature = round(random.uniform(45.0, 80.0), 2), round(random.uniform(15.0, 23.0), 2)
 
     if humidity and temperature:
         return {'humidity': humidity, 'temperature': temperature}
@@ -28,7 +27,7 @@ def get_current_reading():
 def dashboard(request):
     reading = get_current_reading()
 
-    date_from = datetime.now() - timedelta(days=1)
+    date_from = datetime.now() - timedelta(days=7)
 
     temperature = Record.objects.filter(date__gte=date_from).values_list('date', 'temperature')
     humidity = Record.objects.filter(date__gte=date_from).values_list('date', 'humidity')
