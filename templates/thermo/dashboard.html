@@ -10,60 +10,56 @@
 
 </head>
 <body>
-<div class="container">
-    <div class="item datetime">
-        <div class="description">
-           {% now "d-m-Y" %}
+    <div class="container">
+        <div class="item datetime">
+            <div class="description sun">
+               {% now "d-m-Y" %}
+            </div>
+            <div class="description hour sun">
+                {% now "H:i" %}
+            </div>
         </div>
-        <div class="description hour">
-            {% now "H:i" %}
+
+        <div class="item temperature">
+            <div class="description">
+                Temperatura:
+            </div>
+            <div class="value">
+                {{ temperature }}°C
+            </div>
+        </div>
+
+        <div class="item humidity">
+            <div class="description">
+                Wilgotność:
+            </div>
+            <div class="value">
+                {{ humidity }} %
+            </div>
+        </div>
+
+        <div class="item sunrise">
+            <div class="description">
+                Wschód słońca:
+            </div>
+            <div class="description hour sun">
+                {{ sunrise }}
+            </div>
+
+        </div>
+
+        <div class="item sunset">
+            <div class="description">
+                Zachód słońca:
+            </div>
+            <div class="description hour sun">
+                {{ sunset }}
+            </div>
+        </div>
+        <div class="item chart">
+            <svg id="chart"></svg>
         </div>
     </div>
-
-    <div class="item temperature">
-        <div class="description">
-            Temperatura:
-        </div>
-        <div class="value">
-            {{ temperature }}°C
-        </div>
-    </div>
-
-    <div class="item humidity">
-        <div class="description">
-            Wilgotność:
-        </div>
-        <div class="value">
-            {{ humidity }} %
-        </div>
-    </div>
-
-    <div class="item sunrise">
-        <div class="description">
-            Wschód słońca:
-        </div>
-        <div class="description hour sun">
-            6:45
-        </div>
-
-    </div>
-
-    <div class="item sunset">
-        <div class="description">
-            Zachód słońca:
-        </div>
-        <div class="description hour sun">
-            17:04
-        </div>
-    </div>
-    <div class="item chart">
-        <svg id="chart"></svg>
-    </div>
-</div>
-
-    <p>{{ records.temperature }}</p>
-    <p>{{ records.humidity }}</p>
-
 
     <script src="{% static "/js/d3.v5.min.js" %}"></script>
     <script>
@@ -85,13 +81,19 @@
         var data = parseData({{ records.temperature|safe }});
         var data1 = parseData({{ records.humidity|safe }});
 
-        var svgWidth = 480, svgHeight = 480;
-        var margin = { top: 0, right: 20, bottom: 50, left: 30 };
-        var width = svgWidth - margin.left - margin.right;
-        var height = svgHeight - margin.top - margin.bottom;
+        // var svgWidth = 480, svgHeight = 480;
+        var svgWidth = parseInt(d3.select("#chart").style("width")),
+            svgHeight = parseInt(d3.select("#chart").style("height"));
+
+        var margin = { top: 0, right: 20, bottom: 30, left: 30 },
+            width = svgWidth - margin.left - margin.right,
+            height = svgHeight - margin.top - margin.bottom;
+
         var svg = d3.select('svg')
-         .attr("width", svgWidth)
-         .attr("height", svgHeight);
+            .attr("width", svgWidth)
+            .attr("height", svgHeight)
+            //.attr("preserveAspectRatio", "xMinYMin meet")
+            //.attr("viewBox", "0 0 " + svgWidth + " " + svgHeight);
 
         var g = svg.append("g")
         .attr("transform",

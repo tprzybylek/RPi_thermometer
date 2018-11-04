@@ -39,6 +39,7 @@ body {
      font-size: 4em;
      text-align: right;
      font-family: 'Roboto Mono', monospace;
+     white-space: nowrap;
  }
 
 .datetime {
