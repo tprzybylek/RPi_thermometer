@@ -82,13 +82,18 @@ body {
     grid-row: 5;
 }
 
-@media only screen and (max-width: 600px) {
-    body {
-        margin: 0px;
+@media only screen and (max-device-width: 600px) {
+    .container {
+        margin: 0;
+        width: 100%;
+        max-width: none;
     }
 
-    .container {
-        margin: 0.5em;
-        min-width: 390px;
+    .description {
+        font-size: 1.5em;
+    }
+
+    .sun {
+    font-size: 2em;
     }
 }
