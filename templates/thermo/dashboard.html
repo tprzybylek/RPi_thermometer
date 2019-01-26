@@ -7,7 +7,6 @@
     <title>Dashboard</title>
     <link rel="stylesheet" type="text/css" href="{% static "/css/base.css" %}">
     <link href="https://fonts.googleapis.com/css?family=Roboto|Roboto+Mono" rel="stylesheet">
-
 </head>
 <body>
     <div class="container">
@@ -17,6 +16,24 @@
             </div>
             <div class="description hour sun">
                 {% now "H:i" %}
+            </div>
+        </div>
+
+        <div class="item outdoor_temperature">
+            <div class="description">
+                Temperatura:
+            </div>
+            <div class="value">
+                {{ outdoor_temperature }}°C
+            </div>
+        </div>
+
+        <div class="item outdoor_humidity">
+            <div class="description">
+                Wilgotność:
+            </div>
+            <div class="value">
+                {{ outdoor_humidity }} %
             </div>
         </div>
 
@@ -35,6 +52,18 @@
             </div>
             <div class="value">
                 {{ humidity }} %
+            </div>
+        </div>
+
+        <div class="item air_quality">
+            <div class="description">
+                Jakość powietrza:
+            </div>
+            <div class="value">
+                {{ aqi }} <span class="level-{{ aqi_level }}">&#8226</span>
+            </div>
+            <div class="description-aqi">
+                {{ aqi_level_description }}
             </div>
         </div>
 
