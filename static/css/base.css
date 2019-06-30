@@ -3,119 +3,234 @@ body {
     font-size: 16px;
 }
 
-#chart {
+/*
+* ===CHARTS STYLING ===
+*/
+
+#temperature-chart {
     width: 100%;
-    height: 480px;
+    height: 300px;
 }
 
-.container > div {
-    background-color: #e6e6e6;
-    padding: 1em;
-    margin: 0.5em;
-    color: #000000;
-}.container {
+#humidity-chart {
+    width: 100%;
+    height: 300px;
+}
+
+#aq-chart {
+    width: 100%;
+    height: 300px;
+}
+
+.line {
+  fill: none;
+  stroke-width: 2px;
+}
+
+.line.t {
+    stroke: #ff0000;
+}
+
+.line.h {
+    stroke: #2E8B57;
+}
+
+.line.no2 {
+    stroke: #2E8B57;
+}
+
+.line.o3 {
+    stroke: #5e1f7d;
+}
+
+.line.pm25 {
+    stroke: #ff0000;
+}
+
+.line.pm10 {
+    stroke: #e9861c;
+}
+
+.grid line {
+  stroke: darkgrey;
+  stroke-opacity: 1.0;
+  shape-rendering: crispEdges;
+}
+
+.grid path {
+  stroke-width: 0;
+}
+
+.axis {
+    font-size: 1em;
+}
+
+/*
+* ===GRID TEMPLATE===
+*/
+
+.wrapper {
     display: grid;
     grid-template-columns: 50% 50%;
-    grid-template-rows: 5em 8em 8em 8em 5em auto;
+    grid-template-rows: 5em 10em 10em fit-content(10em) auto;
     margin: auto;
     max-width: 800px;
 }
-
- .container > div:hover {
-    background-color: #d7d7d7;
-}
-
-.description-aqi {
-        font-size: 1.5em;
-        grid-column: 1 / 3;
-    }
-
- .hour {
-     text-align: right;
- }.sun{
-    font-size: 2em;
-   }
-
- .value {
-     font-size: 4em;
-     text-align: right;
-     font-family: 'Roboto Mono', monospace;
-     white-space: nowrap;
- }
 
 .datetime {
     grid-column: 1 / 3;
     grid-row: 1;
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: 1fr 1fr;
 }
 
-.temperature {
+.indoor-temperature {
     grid-column: 2;
     grid-row: 2;
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: 1fr;
+    grid-template-rows: 1fr 1fr;
 }
 
-.humidity {
+.indoor-humidity {
     grid-column: 2;
     grid-row: 3;
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: 1fr;
+    grid-template-rows: 1fr 1fr;
 }
 
-.outdoor_temperature {
+.outdoor-temperature {
     grid-column: 1;
     grid-row: 2;
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: 1fr;
+    grid-template-rows: 1fr 1fr;
 }
 
-.outdoor_humidity {
+.outdoor-humidity {
     grid-column: 1;
     grid-row: 3;
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: 1fr;
+    grid-template-rows: 1fr 1fr;
 }
 
-.air_quality {
+.aqi {
     grid-column: 1;
-    grid-row: 4 / 6;
+    grid-row: 4;
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: 1fr;
+    grid-template-rows: 1fr auto;
+}
+
+.aqi-simple {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 1fr;
+}
+
+.aqi-detailed {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: repeat(5, 1fr);
+}
+
+.hidden {
+    display: none;
 }
 
 .sunrise {
     grid-column: 1;
-    grid-row: 6;
+    grid-row: 5;
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: 1fr;
+    grid-template-rows: 1fr 1fr;
 }
 
 .sunset {
     grid-column: 2;
-    grid-row: 6;
+    grid-row: 5;
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: 1fr;
+    grid-template-rows: 1fr 1fr;
 }
 
-.chart {
+.temperature-chart {
+    grid-column: 1 / 3;
+    grid-row: 6;
+}
+
+.humidity-chart {
     grid-column: 1 / 3;
     grid-row: 7;
 }
 
-.level-0 {color: #00990f
+.aq-chart {
+    grid-column: 1 / 3;
+    grid-row: 8;
 }
-.level-1 {color: #a8bf00
+
+/*
+* ===ITEM TEMPLATE===
+*/
+
+.item {
+    display: grid;
+    background-color: #e6e6e6;
+    padding: 1em;
+    margin: 0.5em;
+    color: #000000;
 }
-.level-2 {color: #fffc51
+
+ .item:hover {
+    background-color: #d7d7d7;
 }
-.level-3 {color: #e9861c
+
+.description {
+    grid-column: 1;
+    grid-row: 1;
+    font-size: 1.2em;
+ }
+
+.value-v {
+    grid-row: 2;
+    text-align: right;
+    font-family: 'Roboto Mono', monospace;
+    white-space: nowrap;
 }
-.level-4 {color: #ff521a
+
+.value-h {
+    grid-column: 2;
+    text-align: right;
+    font-family: 'Roboto Mono', monospace;
+    white-space: nowrap;
 }
-.level-5 {color: #ed2930
+
+.date {
+    grid-column: 1;
+    grid-row: 2;
+    text-align: left;
+    font-size: 2em;
 }
+
+.time {
+    grid-column: 2;
+    grid-row: 2;
+    text-align: right;
+    font-size: 2em;
+}
+
+.value-1 {font-size: 4em;}
+.value-2 {font-size: 2em;}
+.value-3 {font-size: 1.2em;}
+
+.level-0 {color: #00990f}
+.level-1 {color: #a8bf00}
+.level-2 {color: #fffc51}
+.level-3 {color: #e9861c}
+.level-4 {color: #ff521a}
+.level-5 {color: #ed2930}
 
 @media only screen and (max-device-width: 600px) {
     .container {
@@ -125,12 +240,11 @@ body {
     }
 
     .description {
-        font-size: 1.5em;
+        /*font-size: 1.2em;*/
     }
 
 
-
     .sun {
-    font-size: 2em;
+    /*font-size: 2em;*/
     }
 }

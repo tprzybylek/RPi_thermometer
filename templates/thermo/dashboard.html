@@ -9,61 +9,71 @@
     <link href="https://fonts.googleapis.com/css?family=Roboto|Roboto+Mono" rel="stylesheet">
 </head>
 <body>
-    <div class="container">
+    <div class="wrapper">
         <div class="item datetime">
-            <div class="description sun">
+            <div class="date">
                {% now "d-m-Y" %}
             </div>
-            <div class="description hour sun">
+            <div class="time">
                 {% now "H:i" %}
             </div>
         </div>
 
-        <div class="item outdoor_temperature">
+        <div class="item outdoor-temperature">
             <div class="description">
-                Temperatura:
+                Temperatura zewnętrzna:
             </div>
-            <div class="value">
-                {{ outdoor_temperature }}°C
+            <div class="value-v value-1">
+                {{ outdoor.temperature }}°C
             </div>
         </div>
 
-        <div class="item outdoor_humidity">
+        <div class="item outdoor-humidity">
             <div class="description">
-                Wilgotność:
+                Wilgotność zewnętrzna:
             </div>
-            <div class="value">
-                {{ outdoor_humidity }} %
+            <div class="value-v value-1">
+                {{ outdoor.humidity }} %
             </div>
         </div>
 
-        <div class="item temperature">
+        <div class="item indoor-temperature">
             <div class="description">
-                Temperatura:
+                Temperatura wewnętrzna:
             </div>
-            <div class="value">
-                {{ temperature }}°C
+            <div class="value-v value-1">
+                {{ indoor.temperature }}°C
             </div>
         </div>
 
-        <div class="item humidity">
+        <div class="item indoor-humidity">
             <div class="description">
-                Wilgotność:
+                Wilgotność wewnętrzna:
             </div>
-            <div class="value">
-                {{ humidity }} %
+            <div class="value-v value-1">
+                {{ indoor.humidity }} %
             </div>
         </div>
 
-        <div class="item air_quality">
+        <div id="aqi-box" class="item aqi">
             <div class="description">
                 Jakość powietrza:
             </div>
-            <div class="value">
-                {{ aqi }} <span class="level-{{ aqi_level }}">&#8226</span>
+            <div id="aqi-simple-box" class="aqi-simple">
+                <div class="value-3">CAQI</div>
+                <div class="value-h value-3">{{ aqi.index.description }}</div>
             </div>
-            <div class="description-aqi">
-                {{ aqi_level_description }}
+            <div id="aqi-detailed-box" class="aqi-detailed hidden">
+                <div class="value-3">CAQI</div>
+                <div class="value-h value-3">{{ aqi.index.value }}</div>
+                <div class="value-3">PM2.5</div>
+                <div class="value-h value-3">{{ aqi.PM25 }} µg/m<sup>3</sup></div>
+                <div class="value-3">PM10</div>
+                <div class="value-h value-3">{{ aqi.PM10 }} µg/m<sup>3</sup></div>
+                <div class="value-3">NO2</div>
+                <div class="value-h value-3">{{ aqi.NO2 }} µg/m<sup>3</sup></div>
+                <div class="value-3">O3</div>
+                <div class="value-h value-3">{{ aqi.O3 }} µg/m<sup>3</sup></div>
             </div>
         </div>
 
@@ -71,7 +81,7 @@
             <div class="description">
                 Wschód słońca:
             </div>
-            <div class="description hour sun">
+            <div class="time">
                 {{ sunrise }}
             </div>
 
@@ -81,120 +91,335 @@
             <div class="description">
                 Zachód słońca:
             </div>
-            <div class="description hour sun">
+            <div class="time">
                 {{ sunset }}
             </div>
         </div>
-        <div class="item chart">
-            <svg id="chart"></svg>
+        <div class="item temperature-chart">
+            <svg id="temperature-chart"></svg>
+        </div>
+        <div class="item humidity-chart">
+            <svg id="humidity-chart"></svg>
+        </div>
+        <div class="item aq-chart">
+            <svg id="aq-chart"></svg>
         </div>
     </div>
-
+    <script>
+        let box = document.getElementById("aqi-box");
+        let aqiSimpleBox = document.getElementById("aqi-simple-box");
+        let aqiDetailedBox = document.getElementById("aqi-detailed-box");
+        box.onclick = function () {
+            aqiSimpleBox.classList.toggle("hidden");
+            aqiDetailedBox.classList.toggle("hidden");
+        };
+    </script>
     <script src="{% static "/js/d3.v5.min.js" %}"></script>
     <script>
-        function parseData(data) {
-            var datetimeFormat = d3.isoFormat;
-
-            var arr = [];
-            for (var i in data) {
-                arr.push(
-                    {
-                        date: d3.isoParse(data[i][0]),
-                        value: data[i][1]
-                    }
-                );
-            }
-            return arr;
+        function makeGridlineX(axis) {
+            return d3.axisBottom(axis)
+                .ticks(d3.timeMinute.every(60))
         }
 
-        var data = parseData({{ records.temperature|safe }});
-        var data1 = parseData({{ records.humidity|safe }});
+        function makeGridlineY(axis) {
+            return d3.axisLeft(axis)
+                .ticks()
+        }
 
-        // var svgWidth = 480, svgHeight = 480;
-        var svgWidth = parseInt(d3.select("#chart").style("width")),
-            svgHeight = parseInt(d3.select("#chart").style("height"));
+        let data = {{ chart_data|safe }};
 
-        var margin = { top: 0, right: 20, bottom: 30, left: 30 },
+        // set the dimensions and margins of the graph
+        let svgWidth = parseInt(d3.select("#temperature-chart").style("width")),
+            svgHeight = parseInt(d3.select("#temperature-chart").style("height"));
+
+        let margin = { top: 10, right: 10, bottom: 70, left: 40 },
             width = svgWidth - margin.left - margin.right,
             height = svgHeight - margin.top - margin.bottom;
+        ////////////////////////////////////////////////////////////////////////////////////////
+        // append the svg obgect to the body of the page
+        // appends a 'group' element to 'svg'
+        // moves the 'group' element to the top left margin
+        let svg = d3.select("#temperature-chart")
+            .attr("width", width + margin.left + margin.right)
+            .attr("height", height + margin.top + margin.bottom)
+            .append("g")
+            .attr("transform",
+                  "translate(" + margin.left + "," + margin.top + ")");
 
-        var svg = d3.select('svg')
-            .attr("width", svgWidth)
-            .attr("height", svgHeight)
-            //.attr("preserveAspectRatio", "xMinYMin meet")
-            //.attr("viewBox", "0 0 " + svgWidth + " " + svgHeight);
+        // set the ranges
+        let x = d3.scaleTime().rangeRound([0, width]);
+        let y0 = d3.scaleLinear().rangeRound([height, 0]);
 
-        var g = svg.append("g")
-        .attr("transform",
-          "translate(" + margin.left + "," + margin.top + ")"
-        );
+        // define the line
+        let line0 = d3.line()
+            .x(function(d) { return x(d.date) })
+            .y(function(d) { return y0(d.indoor_temperature) })
+            .curve(d3.curveCardinal.tension(0.5));
 
-        var x = d3.scaleTime().rangeRound([0, width]);
-        var y = d3.scaleLinear().rangeRound([height, 0]);
-        var y1 = d3.scaleLinear().rangeRound([height, 0]);
+        let line1 = d3.line()
+            .x(function(d) { return x(d.date) })
+            .y(function(d) { return y0(d.outdoor_temperature) })
+            .curve(d3.curveCardinal.tension(0.5));
 
+        // format the data
+        data.forEach(function(d) {
+            d.date =  d3.isoParse(d.date);
+            d.indoor_temperature = +d.indoor_temperature;
+            d.outdoor_temperature = +d.outdoor_temperature;
+            });
 
-        var line = d3.line()
-            .x(function(d) { return x(d.date)})
-            .y(function(d) { return y(d.value)})
-            //.curve(d3.curveCardinal)
-            ;
+        // Scale the range of the data
+        x.domain(d3.extent(data, function(d) { return d.date; }));
 
-        var line1 = d3.line()
-            .x(function(d) { return x(d.date)})
-            .y(function(d) { return y1(d.value)})
-            //.curve(d3.curveCardinal)
-            ;
+        y0.domain([
+            d3.min(data, function(d) {
+                let values = [d.indoor_temperature, d.outdoor_temperature];
+                return Math.floor(Math.min(...values.filter(value => !isNaN(value)))/5)*5;
+            }),
 
-        x.domain(d3.extent(data, function(d) { console.log(d.date); return d.date }));
-        y.domain(d3.extent(data, function(d) { return d.value }));
-        y1.domain(d3.extent(data1, function(d) { return d.value }));
+            d3.max(data, function(d) {
+                let values = [d.indoor_temperature, d.outdoor_temperature];
+                return Math.ceil(Math.max(...values.filter(value => !isNaN(value)))/5)*5;
+            })
+        ]);
 
-
-        g.append("g")
+        // Add the X grid
+        svg.append("g")
+            .attr("class", "grid")
             .attr("transform", "translate(0," + height + ")")
-            .call(d3.axisBottom(x))
-            .select(".domain")
-            .remove();
+            //.call(d3.axisBottom(x));
+            .call(makeGridlineX(x)
 
-        g.append("g")
-            .call(d3.axisLeft(y))
-            .append("text")
-            .attr("fill", "steelblue")
-            .attr("transform", "rotate(-90)")
-            .attr("y", 6)
-            .attr("dy", "0.71em")
-            .attr("text-anchor", "end")
-            .text("Temperatura (°C)");
 
-        g.append("g")
-            .attr("transform", "translate( " + width + ", 0 )")
-            .call(d3.axisRight(y1))
-            .append("text")
-            .attr("fill", "seagreen")
-            .attr("transform", "rotate(-90)")
-            .attr("y", 6)
-            .attr("dy", "-1em")
-            .attr("text-anchor", "end")
-            .text("Wilgotność (%)");
+            .tickSize(-height)
+            .tickFormat(" ")
+            );
 
-        g.append("path")
-            .datum(data)
-            .attr("fill", "none")
-            .attr("stroke", "steelblue")
-            .attr("stroke-linejoin", "round")
-            .attr("stroke-linecap", "round")
-            .attr("stroke-width", 2)
-            .attr("d", line);
+        // Add the Y grid
+        svg.append("g")
+            //.call(d3.axisLeft(y0));
+            .attr("class", "grid")
+            .call(makeGridlineY(y0)
+                .tickSize(-width)
+                .tickFormat(" ")
+            );
 
-        g.append("path")
-            .datum(data1)
-            .attr("fill", "none")
-            .attr("stroke", "seagreen")
-            .attr("stroke-linejoin", "round")
-            .attr("stroke-linecap", "round")
-            .attr("stroke-width", 2)
+        svg.append("path")
+            .data([data.filter(function(d) {
+                return !isNaN(d.indoor_temperature)
+            })])
+            .attr("class", "line t indoor")
+            .style("stroke-dasharray", ("3, 3"))
+            .attr("d", line0);
+
+        svg.append("path")
+            .data([data.filter(function(d) {
+                return !isNaN(d.outdoor_temperature)
+            })])
+            .attr("class", "line t outdoor")
             .attr("d", line1);
+
+        // Add the X Axis
+        svg.append("g")
+            .attr("class", "axis")
+            .attr("transform", "translate(0," + height + ")")
+            .call(d3.axisBottom(x).tickFormat(d3.timeFormat("%H")));
+
+        // Add the Y Axis
+        svg.append("g")
+            .attr("class", "axis")
+            .call(d3.axisLeft(y0));
+        ////////////////////////////////////////////////////////////////////////////////////////
+        svg = d3.select("#humidity-chart")
+            .attr("width", width + margin.left + margin.right)
+            .attr("height", height + margin.top + margin.bottom)
+            .append("g")
+            .attr("transform",
+                  "translate(" + margin.left + "," + margin.top + ")");
+
+        let line2 = d3.line()
+            .x(function(d) { return x(d.date) })
+            .y(function(d) { return y1(d.indoor_humidity) })
+            .curve(d3.curveCardinal.tension(0.5));
+
+        let line3 = d3.line()
+            .x(function(d) { return x(d.date) })
+            .y(function(d) { return y1(d.outdoor_humidity) })
+            .curve(d3.curveCardinal.tension(0.5));
+
+        data.forEach(function(d) {
+            d.date =  d3.isoParse(d.date);
+            d.indoor_humidity = +d.indoor_humidity;
+            d.outdoor_humidity = +d.outdoor_humidity;
+            });
+
+        let y1 = d3.scaleLinear().rangeRound([height, 0]);
+
+        y1.domain([
+            d3.min(data, function(d) {
+                let values = [d.indoor_humidity, d.outdoor_humidity];
+                return Math.floor(Math.min(...values.filter(value => !isNaN(value)))/5)*5;
+            }),
+
+            d3.max(data, function(d) {
+                let values = [d.indoor_humidity, d.outdoor_humidity];
+                return Math.ceil(Math.max(...values.filter(value => !isNaN(value)))/5)*5;
+            })
+        ]);
+
+        // Add the X grid
+        svg.append("g")
+            .attr("class", "grid")
+            .attr("transform", "translate(0," + height + ")")
+            //.call(d3.axisBottom(x));
+            .call(makeGridlineX(x)
+
+            .tickSize(-height)
+            .tickFormat(" ")
+            );
+
+        // Add the Y grid
+        svg.append("g")
+            //.call(d3.axisLeft(y0));
+            .attr("class", "grid")
+            .call(makeGridlineY(y1)
+                .tickSize(-width)
+                .tickFormat(" ")
+            );
+
+        svg.append("path")
+            .data([data.filter(function(d) {
+                return !isNaN(d.indoor_humidity)
+            })])
+            .attr("class", "line h indoor")
+            .style("stroke-dasharray", ("3, 3"))
+            .attr("d", line2);
+
+        svg.append("path")
+            .data([data.filter(function(d) {
+                return !isNaN(d.outdoor_humidity)
+            })])
+            .attr("class", "line h outdoor")
+            .attr("d", line3);
+
+        // Add the X Axis
+        svg.append("g")
+            .attr("class", "axis")
+            .attr("transform", "translate(0," + height + ")")
+            .call(d3.axisBottom(x).tickFormat(d3.timeFormat("%H")));
+
+        // Add the Y Axis
+        svg.append("g")
+            .attr("class", "axis")
+            .call(d3.axisLeft(y1));
+        ////////////////////////////////////////////////////////////////////////////////////////
+        svg = d3.select("#aq-chart")
+            .attr("width", width + margin.left + margin.right)
+            .attr("height", height + margin.top + margin.bottom)
+            .append("g")
+            .attr("transform",
+                  "translate(" + margin.left + "," + margin.top + ")");
+
+        let line4 = d3.line()
+            .x(function(d) { return x(d.date) })
+            .y(function(d) { return y2(d.no2) })
+            .curve(d3.curveCardinal.tension(0.5));
+
+        let line5 = d3.line()
+            .x(function(d) { return x(d.date) })
+            .y(function(d) { return y2(d.o3) })
+            .curve(d3.curveCardinal.tension(0.5));
+
+        let line6 = d3.line()
+            .x(function(d) { return x(d.date) })
+            .y(function(d) { return y2(d.pm25) })
+            .curve(d3.curveCardinal.tension(0.5));
+
+        let line7 = d3.line()
+            .x(function(d) { return x(d.date) })
+            .y(function(d) { return y2(d.pm10) })
+            .curve(d3.curveCardinal.tension(0.5));
+
+        data.forEach(function(d) {
+            d.date =  d3.isoParse(d.date);
+            d.no2 = +d.no2;
+            d.o3 = +d.o3;
+            d.pm25 = +d.pm25;
+            d.pm10 = +d.pm10;
+        });
+
+        let y2 = d3.scaleLinear().rangeRound([height, 0]);
+
+        y2.domain([
+            d3.min(data, function(d) {
+                let values = [d.no2, d.o3, d.pm25, d.pm10];
+                return Math.floor(Math.min(...values.filter(value => !isNaN(value)))/5)*5;
+            }),
+
+            d3.max(data, function(d) {
+                let values = [d.no2, d.o3, d.pm25, d.pm10];
+                return Math.ceil(Math.max(...values.filter(value => !isNaN(value)))/5)*5;
+            })
+        ]);
+
+        // Add the X grid
+        svg.append("g")
+            .attr("class", "grid")
+            .attr("transform", "translate(0," + height + ")")
+            //.call(d3.axisBottom(x));
+            .call(makeGridlineX(x)
+
+            .tickSize(-height)
+            .tickFormat(" ")
+            );
+
+        // Add the Y grid
+        svg.append("g")
+            //.call(d3.axisLeft(y0));
+            .attr("class", "grid")
+            .call(makeGridlineY(y2)
+                .tickSize(-width)
+                .tickFormat(" ")
+            );
+
+        svg.append("path")
+            .data([data.filter(function(d) {
+                return !isNaN(d.no2)
+            })])
+            .attr("class", "line h outdoor")
+            .attr("d", line4);
+
+        svg.append("path")
+            .data([data.filter(function(d) {
+                return !isNaN(d.o3)
+            })])
+            .attr("class", "line o3 outdoor")
+            .attr("d", line5);
+
+        svg.append("path")
+            .data([data.filter(function(d) {
+                return !isNaN(d.pm25)
+            })])
+            .attr("class", "line pm25 indoor")
+            .attr("d", line6);
+
+        svg.append("path")
+            .data([data.filter(function(d) {
+                return !isNaN(d.pm10)
+            })])
+            .attr("class", "line pm10 outdoor")
+            .attr("d", line7);
+
+        // Add the X Axis
+        svg.append("g")
+            .attr("class", "axis")
+            .attr("transform", "translate(0," + height + ")")
+            .call(d3.axisBottom(x).tickFormat(d3.timeFormat("%H")));
+
+        // Add the Y Axis
+        svg.append("g")
+            .attr("class", "axis")
+            .call(d3.axisLeft(y2));
     </script>
 </body>
 </html>
