@@ -49,8 +49,9 @@ class Command(BaseCommand):
 
         if last_record:
             time_diff = datetime.now(pytz.utc) - last_record.date
-            if time_diff.total_seconds()/3600 > 1.75:
+            if time_diff.total_seconds() / 3600 > 1.75:
                 print(time_diff.total_seconds()/3600)
+
                 responses = dict()
                 for sensor in station['sensors']:
                     request_url = api_url + sensor_url + str(sensor['sensor_id'])

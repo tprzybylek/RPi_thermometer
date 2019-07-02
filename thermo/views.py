@@ -1,14 +1,9 @@
 from django.shortcuts import render
-
-from django.http import JsonResponse, HttpResponse
 from .models import Record
 import Adafruit_DHT as adafruit
-import random
 from datetime import datetime, timedelta
-from django.db.models import Q
 import pytz
 
-import requests
 import ephem
 
 import json
@@ -16,14 +11,12 @@ from django.core.serializers.json import DjangoJSONEncoder
 
 
 def get_current_reading():
-    # sensor_model = adafruit.AM2302
-    # sensor_pin = 4
-    #
-    # humidity, temperature = adafruit.read_retry(sensor_model, sensor_pin)
-    # humidity = round(humidity, 0)
-    # temperature = round(temperature, 1)
+    sensor_model = adafruit.AM2302
+    sensor_pin = 4
 
-    humidity, temperature = round(random.uniform(45.0, 80.0), 0), round(random.uniform(15.0, 23.0), 1)
+    humidity, temperature = adafruit.read_retry(sensor_model, sensor_pin)
+    humidity = round(humidity, 0)
+    temperature = round(temperature, 1)
 
     if humidity and temperature:
         return {'humidity': humidity, 'temperature': temperature}
