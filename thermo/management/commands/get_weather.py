@@ -1,6 +1,6 @@
 from django.core.management.base import BaseCommand
 from thermo.models import Record
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from django.db.models import Q
 import pytz
@@ -11,6 +11,12 @@ class Command(BaseCommand):
     help = 'Retrieves weather data from OpenWeatherMap'
 
     def handle(self, *args, **options):
+        def round_datetime(t):
+            dt = timedelta(hours=t.minute // 30)
+            t = t.replace(second=0, microsecond=0, minute=0)
+            t = t + dt
+            return t
+
         def create_record():
             response = requests. \
                 get(request_url, params={'id': city_id, 'appid': api_key, 'units': 'metric', 'lang': 'pl'}) \
@@ -18,7 +24,7 @@ class Command(BaseCommand):
 
             utc = pytz.utc
             ts = response['dt']
-            ts = utc.localize(datetime.utcfromtimestamp(ts)).replace(minute=0, second=0)
+            ts = round_datetime(utc.localize(datetime.utcfromtimestamp(ts)))
 
             defaults = {
                 'outdoor_temperature': response['main']['temp'],
