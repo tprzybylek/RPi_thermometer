@@ -211,15 +211,15 @@
             .data([data.filter(function(d) {
                 return !isNaN(d.indoor_temperature)
             })])
-            .attr("class", "line t indoor")
-            .style("stroke-dasharray", ("3, 3"))
+            .attr("class", "line temperature indoor")
+            //.style("stroke-array", ("3, 3"))
             .attr("d", line0);
 
         svg.append("path")
             .data([data.filter(function(d) {
                 return !isNaN(d.outdoor_temperature)
             })])
-            .attr("class", "line t outdoor")
+            .attr("class", "line temperature outdoor")
             .attr("d", line1);
 
         // Add the X Axis
@@ -232,6 +232,44 @@
         svg.append("g")
             .attr("class", "axis")
             .call(d3.axisLeft(y0));
+
+        /////////////////// LEGEND
+        let legend = d3.select("#temperature-chart").append("g").attr("class", "legend")
+            .attr("transform",
+                  "translate(" + margin.left + "," + (margin.top + height + 50) + ")");
+
+        let legendItems = [
+            {
+                index: 0,
+                name: 'Temperatura zewn.',
+                class: 'line temperature outdoor'
+            },
+            {
+                index: 1,
+                name: 'Temperatura wewn.',
+                class: 'line temperature indoor'
+            }
+        ];
+
+        let legendItem = legend.selectAll(".legend-item")
+            .data(legendItems)
+            .enter()
+            .append("g")
+            .classed('legend-item', true);
+
+        legendItem.append('line')
+            .attr("class", function(d) {return d.class})
+            //.attr("d", "M0 15 L20 15");
+            .attr("x1", function(d) {return d.index * 240})
+            .attr("y1", 8)
+            .attr("x2", function(d) {return 20 + d.index * 240})
+            .attr("y2", 8);
+
+        legendItem.append('text')
+            .attr('x', function(d) {return 25 + d.index * 240})
+            .attr('y', 12)
+            .text(function(d) {return d.name});
+
         ////////////////////////////////////////////////////////////////////////////////////////
         svg = d3.select("#humidity-chart")
             .attr("width", width + margin.left + margin.right)
@@ -294,15 +332,15 @@
             .data([data.filter(function(d) {
                 return !isNaN(d.indoor_humidity)
             })])
-            .attr("class", "line h indoor")
-            .style("stroke-dasharray", ("3, 3"))
+            .attr("class", "line humidity indoor")
+            //.style("stroke-dasharray", ("3, 3"))
             .attr("d", line2);
 
         svg.append("path")
             .data([data.filter(function(d) {
                 return !isNaN(d.outdoor_humidity)
             })])
-            .attr("class", "line h outdoor")
+            .attr("class", "line humidity outdoor")
             .attr("d", line3);
 
         // Add the X Axis
@@ -315,6 +353,44 @@
         svg.append("g")
             .attr("class", "axis")
             .call(d3.axisLeft(y1));
+
+        /////////////////// LEGEND
+        legend = d3.select("#humidity-chart").append("g").attr("class", "legend")
+            .attr("transform",
+                  "translate(" + margin.left + "," + (margin.top + height + 50) + ")");
+
+        legendItems = [
+            {
+                index: 0,
+                name: 'Wilgotność zewn.',
+                class: 'line humidity outdoor'
+            },
+            {
+                index: 1,
+                name: 'Wilgotność wewn.',
+                class: 'line humidity indoor'
+            }
+        ];
+
+        legendItem = legend.selectAll(".legend-item")
+            .data(legendItems)
+            .enter()
+            .append("g")
+            .classed('legend-item', true);
+
+        legendItem.append('line')
+            .attr("class", function(d) {return d.class})
+            //.attr("d", "M0 15 L20 15");
+            .attr("x1", function(d) {return d.index * 240})
+            .attr("y1", 8)
+            .attr("x2", function(d) {return 20 + d.index * 240})
+            .attr("y2", 8);
+
+        legendItem.append('text')
+            .attr('x', function(d) {return 25 + d.index * 240})
+            .attr('y', 12)
+            .text(function(d) {return d.name});
+
         ////////////////////////////////////////////////////////////////////////////////////////
         svg = d3.select("#aq-chart")
             .attr("width", width + margin.left + margin.right)
@@ -389,28 +465,28 @@
             .data([data.filter(function(d) {
                 return !isNaN(d.no2)
             })])
-            .attr("class", "line h outdoor")
+            .attr("class", "line no2")
             .attr("d", line4);
 
         svg.append("path")
             .data([data.filter(function(d) {
                 return !isNaN(d.o3)
             })])
-            .attr("class", "line o3 outdoor")
+            .attr("class", "line o3")
             .attr("d", line5);
 
         svg.append("path")
             .data([data.filter(function(d) {
                 return !isNaN(d.pm25)
             })])
-            .attr("class", "line pm25 indoor")
+            .attr("class", "line pm25")
             .attr("d", line6);
 
         svg.append("path")
             .data([data.filter(function(d) {
                 return !isNaN(d.pm10)
             })])
-            .attr("class", "line pm10 outdoor")
+            .attr("class", "line pm10")
             .attr("d", line7);
 
         // Add the X Axis
@@ -423,6 +499,54 @@
         svg.append("g")
             .attr("class", "axis")
             .call(d3.axisLeft(y2));
+
+        /////////////////// LEGEND
+
+        legend = d3.select("#aq-chart").append("g").attr("class", "legend")
+            .attr("transform",
+                  "translate(" + margin.left + "," + (margin.top + height + 50) + ")");
+
+        legendItems = [
+            {
+                index: 0,
+                name: 'PM 2.5',
+                class: 'line pm25'
+            },
+            {
+                index: 1,
+                name: 'PM 10',
+                class: 'line pm10'
+            },
+            {
+                index: 2,
+                name: 'NO2',
+                class: 'line no2'
+            },
+            {
+                index: 3,
+                name: 'O3',
+                class: 'line o3'
+            },
+        ];
+
+        legendItem = legend.selectAll(".legend-item")
+            .data(legendItems)
+            .enter()
+            .append("g")
+            .classed('legend-item', true);
+
+        legendItem.append('line')
+            .attr("class", function(d) {return d.class})
+            //.attr("d", "M0 15 L20 15");
+            .attr("x1", function(d) {return d.index * 120})
+            .attr("y1", 8)
+            .attr("x2", function(d) {return 20 + d.index * 120})
+            .attr("y2", 8);
+
+        legendItem.append('text')
+            .attr('x', function(d) {return 25 + d.index * 120})
+            .attr('y', 12)
+            .text(function(d) {return d.name});
     </script>
 </body>
 </html>

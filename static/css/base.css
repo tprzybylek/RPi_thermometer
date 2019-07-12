@@ -27,11 +27,11 @@ body {
   stroke-width: 2px;
 }
 
-.line.t {
+.line.temperature {
     stroke: #ff0000;
 }
 
-.line.h {
+.line.humidity {
     stroke: #2E8B57;
 }
 
@@ -49,6 +49,10 @@ body {
 
 .line.pm10 {
     stroke: #e9861c;
+}
+
+.indoor {
+    stroke-dasharray: 3, 3;
 }
 
 .grid line {
